@@ -1,0 +1,161 @@
+#include <iostream>
+#include <curses.h>
+#include<string>
+#include "wincursor.h"
+Screen myScreen;
+String sp(" ", 10, 10);
+
+struct graphic{
+    int dy;
+    int dx;
+};
+
+struct Tetromino{
+    graphic s[8];
+};
+
+Tetromino t[7] = {
+    1,50, 1,51, 1,52, 1,53, 1,54, 1,55, 1,56, 1,57,
+    0,50, 1,50, 0,51, 1,51, 1,52, 1,53, 1,54, 1,55,
+    1,50, 1,51, 1,52, 1,53, 1,54, 0,54, 0,55, 1,55,
+    0,50, 1,50, 0,51, 1,51, 0,52, 1,52, 0,53, 1,53,
+    1,50, 1,51, 1,52, 0,52, 1,53, 0,53, 0,54, 0,55,
+    1,50, 1,51, 1,52, 0,52, 0,53, 1,53, 1,54, 1,55,
+    0,50, 0,51, 0,52, 1,52, 0,53, 1,53, 1,54, 1,55 };
+
+int savedpos[21][26] = { {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9} };
+
+int pos_x[8];
+int pos_y[8];
+bool falling = true;
+bool moving = true;
+void Checkbottom(int n) {//use color n to check it is itselves or other block in savedpos
+    for (int i = 0; i < 8; i++) {
+        if (savedpos[pos_y[i]][pos_x[i] - 50] != 0) {
+            falling = false;
+            for (int j = 0; j < 8; j++) {
+                savedpos[pos_y[j] - 1][pos_x[j] - 50] = n;
+            }
+            break;
+        }
+        //printf("%d,  ", savedpos[pos_y[i]][pos_x[i] - 50]);
+    }
+    //printf("\n"); 
+}
+
+void Draw_block(int n, int y0, int x0){
+    for (int i = 0; i <= 7; i++){
+        sp.show(t[n - 1].s[i].dy + y0, t[n - 1].s[i].dx + x0, n);
+        pos_x[i] = t[n - 1].s[i].dx + x0;
+        pos_y[i] = t[n - 1].s[i].dy + y0;
+        if (!falling) {
+            //printw("Current position: (%d, %d)", t[n - 1].s[i].dy + y0, t[n - 1].s[i].dx + x0);
+            savedpos[t[n - 1].s[i].dy + y0 - 1][t[n - 1].s[i].dx + x0 - 50] = n;
+        }
+    }
+    myScreen.redraw();
+}
+
+void Erase_block(int n, int y0, int x0){
+    if (falling) {
+        for (int i = 0; i <= 7; i++) {
+            sp.show(t[n - 1].s[i].dy + y0, t[n - 1].s[i].dx + x0, 0);
+        }
+        myScreen.redraw();
+    }
+}
+
+void Draw_border(){//50-75
+    for (int Long = 0; Long <= 20; Long++){
+        sp.setText("**");
+        sp.show(Long, 48, 0);
+        sp.show(Long, 76, 0);
+    }
+    for (int width = 50; width <= 75; width++){
+        sp.setText("*");
+        sp.show(21, width, 0);
+        sp.show(22, width, 0);
+    }
+    myScreen.redraw();
+    sp.setText(" ");
+}
+
+
+int main(){
+    char i, c;
+    Draw_border();
+    Screen myScreen;
+    myScreen.setTimeOut(300);   // millisecond
+    bool finished = false;
+    while (!finished){
+        int randomcolor = (rand() % 7) + 1;
+        int random_x = (rand() % 9) * 2;
+        int move_x = 0;
+        falling = true;
+        for (int y = 0; y < 20; ++y){
+            Draw_block(randomcolor, y, random_x + move_x);
+            c = myScreen.key();
+            Checkbottom(randomcolor);
+            Erase_block(randomcolor, y, random_x + move_x);
+           
+            switch (c){
+            case 'q':
+                finished = true;
+                break;
+            case 'a':
+                if (t[randomcolor - 1].s[0].dx + random_x + move_x > 50 && moving == true){
+                    move_x -= 2;
+                    break;
+                }
+                break;
+            case 'd':
+                if (t[randomcolor - 1].s[7].dx + random_x + move_x < 75 && moving == true){
+                    move_x += 2;
+                    break;
+                }
+                break;
+            }
+            if (finished) break; 
+            Erase_block(randomcolor, y, random_x + move_x);
+            myScreen.redraw();
+            if (!falling) { 
+                break;
+            }
+        }
+        //printw("%d\n", random_x);
+        /*
+        for (int i = 0; i < 21; i++) {
+            for (int j = 0; j < 26; j++) {
+                printf("%d", savedpos[i][j]);
+            }
+            printf("\n");
+        }
+        printf("----------------------------\n");
+        */
+        /*
+        for (int i = 0; i < 8; i++) {
+            printf("%d, %d\n", pos_y[i], pos_x[i] - 50);
+        }*/ 
+    }
+    return 0;
+}
